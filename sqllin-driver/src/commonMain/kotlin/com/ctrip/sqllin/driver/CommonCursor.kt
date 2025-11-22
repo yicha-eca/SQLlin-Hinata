@@ -51,6 +51,13 @@ public interface CommonCursor : AutoCloseable {
     public fun getString(columnIndex: Int): String?
 
     /**
+     * Gets the value of the column as a String, or null if the column is NULL.
+     *
+     * @throws IllegalArgumentException if the column doesn't exist
+     */
+    public fun getString(columnName: String): String?
+
+    /**
      * Gets the value of the column as a ByteArray, or null if the column is NULL.
      */
     public fun getByteArray(columnIndex: Int): ByteArray?
@@ -61,6 +68,16 @@ public interface CommonCursor : AutoCloseable {
      * @throws IllegalArgumentException if the column doesn't exist
      */
     public fun getColumnIndex(columnName: String): Int
+
+    /**
+     * Get the number of columns.
+     */
+    public fun getColumnCount(): Int
+
+    /**
+     *  Get all column names.
+     */
+    public fun getColumnName(columnIndex: Int): String
 
     /**
      * Iterates over all rows, invoking the block with the current row index.
