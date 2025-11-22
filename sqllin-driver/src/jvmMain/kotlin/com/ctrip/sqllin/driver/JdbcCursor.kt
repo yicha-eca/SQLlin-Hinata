@@ -17,6 +17,8 @@
 package com.ctrip.sqllin.driver
 
 import java.sql.ResultSet
+import java.sql.SQLException
+import kotlin.IllegalArgumentException
 
 /**
  * JDBC implementation of [CommonCursor] backed by a ResultSet.
@@ -55,9 +57,33 @@ internal class JdbcCursor(private val resultSet: ResultSet) : CommonCursor {
 
     override fun getString(columnIndex: Int): String? = resultSet.getString(columnIndex + 1)
 
+    override fun getString(columnName: String): String? {
+        return getString(getColumnIndex(columnName))
+    }
+
     override fun getByteArray(columnIndex: Int): ByteArray? = resultSet.getBytes(columnIndex + 1)
 
-    override fun getColumnIndex(columnName: String): Int = resultSet.findColumn(columnName) - 1
+    override fun getColumnIndex(columnName: String): Int {
+        try{
+            return resultSet.findColumn(columnName) - 1
+        } catch (e: SQLException){
+            throw IllegalArgumentException("Col for $columnName not found")
+        }
+    }
+
+    override fun getColumnCount(): Int {
+        return resultSet.metaData.columnCount
+    }
+
+    override fun getColumnName(columnIndex: Int): String {
+        val columnCount = resultSet.metaData.columnCount
+        if (columnIndex >= columnCount)
+            throw SQLiteException("$columnIndex exceeds the total number of columns")
+        if (columnIndex < 0)
+            throw SQLiteException("The column index is less than 0")
+
+        return resultSet.metaData.getColumnName(columnIndex + 1)
+    }
 
     override fun forEachRow(block: (Int) -> Unit) {
         var index = 0

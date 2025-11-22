@@ -43,9 +43,23 @@ internal class NativeCursor(
 
     override fun getString(columnIndex: Int): String? = statement.columnGetString(columnIndex)
 
+    override fun getString(columnName: String): String? = statement.columnGetString(getColumnIndex(columnName))
+
     override fun getByteArray(columnIndex: Int): ByteArray? = statement.columnGetBlob(columnIndex)
 
     override fun getColumnIndex(columnName: String): Int = columnNames[columnName] ?: throw IllegalArgumentException("Col for $columnName not found")
+
+    override fun getColumnCount(): Int  = statement.columnCount()
+
+    override fun getColumnName(columnIndex: Int): String  {
+        val columnCount = statement.columnCount()
+        if (columnIndex >= columnCount)
+            throw SQLiteException("$columnIndex exceeds the total number of columns")
+        if (columnIndex < 0)
+            throw SQLiteException("The column index is less than 0")
+
+        return statement.columnName(columnIndex)
+    }
 
     override fun next(): Boolean = statement.step()
 
