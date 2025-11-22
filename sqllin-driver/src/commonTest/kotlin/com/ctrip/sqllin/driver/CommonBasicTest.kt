@@ -221,6 +221,42 @@ class CommonBasicTest(private val path: DatabasePath) {
         }
     }
 
+    fun testGetTableColumns(){
+        val readWriteConfig = getDefaultDBConfig(false)
+        openDatabase(readWriteConfig) {
+            it.withTransaction { connection ->
+                connection.executeInsert(SQL.INSERT_BOOK, arrayOf("The Da Vinci Code", "Dan Brown", 454, 16.96, byteArrayOf()))
+                connection.executeInsert(SQL.INSERT_BOOK, arrayOf("The Lost Symbol", "Dan Brown", 510, 19.95, byteArrayOf(1, 2, 3)))
+                connection.executeInsert(SQL.INSERT_BOOK, arrayOf("", "Dan Brown", 454, 16.96, byteArrayOf()))
+                connection.executeInsert(SQL.INSERT_BOOK, arrayOf("The Lost Symbol", null, 510, 19.95, null))
+            }
+        }
+
+        val readOnlyConfig = getDefaultDBConfig(true)
+        openDatabase(readOnlyConfig) {
+            it.withQuery(SQL.QUERY_BOOK, null) { cursor ->
+                print("column name  : ")
+                for (i in 0 until cursor.getColumnCount()) {
+                    print("       ${cursor.getColumnName(i)}")
+                }
+                println()
+                cursor.forEachRow { rowIndex ->
+                    print("column value : ")
+                    for (i in 0 until cursor.getColumnCount()) {
+                        val columnName = cursor.getColumnName(i)
+                        print("       ${cursor.getString(columnName)}")
+                    }
+                    println()
+
+                    cursor.getString("123")
+                }
+
+                cursor.getColumnName(cursor.getColumnCount() + 1)
+                cursor.getColumnName(-1)
+            }
+        }
+    }
+
     private fun getDefaultDBConfig(isReadOnly: Boolean): DatabaseConfiguration =
         DatabaseConfiguration(
             name = SQL.DATABASE_NAME,

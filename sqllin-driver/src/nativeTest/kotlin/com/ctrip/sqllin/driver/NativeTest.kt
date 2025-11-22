@@ -47,6 +47,9 @@ class NativeTest {
     @Test
     fun testConcurrency() = commonTest.testConcurrency()
 
+    @Test
+    fun testGetTableColumns() = commonTest.testGetTableColumns()
+
     @AfterTest
     fun setDown() {
         deleteDatabase(path, SQL.DATABASE_NAME)
